@@ -36,9 +36,9 @@ public class Main extends Application {
     double Y;
     boolean isSharing = false;
     Stroke currentStroke;
-    String sendingString;
+    String tempJsonString;
 
-    GraphicsContext gcSecond = null;
+    GraphicsContext gc = null;
 
 
     public void setStrokeSize(double strokeSize) {
@@ -63,29 +63,35 @@ public class Main extends Application {
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 0); // text, column, row
 
-//        Button anotherButton = new Button ("Meh");
+        Button anotherButton = new Button ("Start Server");
         Button aButton = new Button("Connect");
         Button button = new Button("Sample paint button");
         HBox hbButton = new HBox(10);
         hbButton.setAlignment(Pos.TOP_LEFT);
         hbButton.getChildren().add(button);
-//        hbButton.getChildren().add(anotherButton);
+        hbButton.getChildren().add(anotherButton);
         hbButton.getChildren().add(aButton);
 //        hbButton.getChildren().add(anotherButton);
         grid.add(hbButton, 0, 1);
-
-//        anotherButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
 //
-//            }
-//        });
+        anotherButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+//                startSecondStage();
+                DisplayServer myServer = new DisplayServer(gc);
+                Thread aThread = new Thread(myServer);
+                aThread.start();
+
+
+            }
+        });
 
         aButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 startClient();
                 isSharing = true;
+
             }
         });
 
@@ -101,7 +107,7 @@ public class Main extends Application {
         // add canvas
         Canvas canvas = new Canvas(DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT-100);
 
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.BLUE);
         gc.setStroke(Color.BLACK);
@@ -125,10 +131,10 @@ public class Main extends Application {
                     strokeSize = strokeSize -1;
                 }else if (keyEvent.getCode().getName() == "C"){
                     gc.clearRect(0,0,DEFAULT_SCENE_WIDTH,DEFAULT_SCENE_HEIGHT);
-                    gcSecond.clearRect(0,0,DEFAULT_SCENE_WIDTH,DEFAULT_SCENE_HEIGHT);
+//                    gc.clearRect(0,0,DEFAULT_SCENE_WIDTH,DEFAULT_SCENE_HEIGHT);
                 }else if (keyEvent.getCode().getName() == "R"){
                     gc.setStroke(Color.color(Math.random(), Math.random(), Math.random()));
-                    gcSecond.setStroke(Color.color(Math.random(), Math.random(), Math.random()));
+//                    gcSecond.setStroke(Color.color(Math.random(), Math.random(), Math.random()));
 
                 }
                 System.out.println(keyEvent.getCode());
@@ -146,34 +152,31 @@ public class Main extends Application {
                         gc.strokeOval(e.getX(), e.getY(), strokeSize, strokeSize);
                         X = e.getX();
                         Y = e.getY();
+
 //                addStroke(e.getX(), e.getY(), 10);
-                        currentStroke = new Stroke(e.getX(),e.getY(), strokeSize);
+                        currentStroke = new Stroke(e.getX(), e.getY(), strokeSize);
 //                        System.out.println(jsonStringGenerator(currentStroke));
-                        String tempJsonString  =  jsonStringGenerator(currentStroke);
-                        System.out.println(tempJsonString);
+                        tempJsonString = jsonStringGeneratorStroke(currentStroke);
+                        startClient();
 
-                        Stroke testJson= jsonRestore(tempJsonString);
-//                        System.out.println("x: " + testJson.strokeX + " y: " + testJson.strokeY + " stroke size: " + testJson.strokeSize);
-                        if(isSharing) {
-                            sendingString = tempJsonString;
+//                        System.out.println(tempJsonString);
 
-                            if (gcSecond != null) {
-                                gcSecond.strokeOval(X, Y, strokeSize, strokeSize);
-                            }
-                        }
+//                        Stroke testJson = jsonRestore(tempJsonString);
+//                        if (gcSecond != null) {
+//                            gcSecond.strokeOval(X, Y, strokeSize, strokeSize);
+//
+////                       System.out.println("x: " + testJson.strokeX + " y: " + testJson.strokeY + " stroke size: " + testJson.strokeSize);
+//
+//                        }
                     }
                 }
             }
         });
-
-
-
         grid.add(canvas, 0, 2);
 
         Scene defaultScene = new Scene(grid, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT);  //step 2
         primaryStage.setScene(defaultScene); // also step 2
         primaryStage.show();
-
     }
 
     public void startSecondStage() {
@@ -211,10 +214,10 @@ public class Main extends Application {
         // add canvas
         Canvas canvas = new Canvas(DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT-100);
 
-        gcSecond = canvas.getGraphicsContext2D();
+//        gc = canvas.getGraphicsContext2D();
 //        gcSecond.setFill(Color.GREEN);
 //        gcSecond.setStroke(Color.BLUE);
-        gcSecond.setStroke(Color.BLACK);
+//        gc.setStroke(Color.BLACK);
 //        gcSecond.strokeOval(X,Y, strokeSize,strokeSize);
 
 //        canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
@@ -235,24 +238,7 @@ public class Main extends Application {
         secondaryStage.show();
     }
 
-//    public static void startServer(){
-//
-//        try {
-//            ServerSocket serverListener = new ServerSocket(8005);
-//
-//            Socket clientSocket = serverListener.accept();
-//            System.out.println("Incoming message from: " + clientSocket.getInetAddress().getHostAddress());
-//            ConnectionHandler handler = new ConnectionHandler(clientSocket);
-//            Thread handlerThread = new Thread(handler);
-//            handlerThread.start();
-//        } catch (IOException ioe) {
-//            ioe.printStackTrace();
-//        }
-//    }
-
-
-
-    public static void startClient() {
+    public void startClient() {
         // connect to the server on the target port
         try {
             Socket clientSocket = new Socket("localhost", 8005);
@@ -260,9 +246,8 @@ public class Main extends Application {
             // once we connect to the server, we also have an input and output stream
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out.println("test");
             // send the server an arbitrary message
-//            out.println("This doesn't work how its supposed to");
+            out.println(tempJsonString);
             // read what the server returns
             String serverResponse = in.readLine();
 
@@ -273,6 +258,7 @@ public class Main extends Application {
             ioe.printStackTrace();
         }
     }
+
 
 //    public void saveStrokes(MouseEvent mouseEvents) {
 //        try {
@@ -296,23 +282,20 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-
-
         launch(args);
-
     }
-    public String jsonStringGenerator(Stroke currentStroke) {
-        System.out.println(currentStroke.strokeX);
+//
+//    public static void serverStart(){
+//        System.out.println("Running");
+//        Server myServer = new Server();
+//        myServer.startServer();
+//    }
+
+    public String jsonStringGeneratorStroke (Stroke currentStroke) {
         JsonSerializer jsonSerializer = new JsonSerializer().deep(true);
         String jsonString = jsonSerializer.serialize(currentStroke);
         return jsonString;
     }
 
-    public Stroke jsonRestore(String jsonTD) {
-        JsonParser toDoItemParser = new JsonParser();
-        Stroke item = toDoItemParser.parse(jsonTD, Stroke.class);
-
-        return item;
-    }
 
 }
