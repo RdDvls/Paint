@@ -89,9 +89,9 @@ public class Main extends Application {
         aButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                startClient();
-                isSharing = true;
-
+//                startClient();
+//                isSharing = true;
+                    isDrawing = true;
             }
         });
 
@@ -124,18 +124,14 @@ public class Main extends Application {
                 if(keyEvent.getCode().getName() == "D"){
                     isDrawing = !isDrawing;
                     System.out.println(isDrawing);
-//                    gc.setStroke(Color.color(Math.random(),Math.random(), Math.random()));
                 }else if(keyEvent.getCode().getName() == "Up" && strokeSize <= 30 ){
                     strokeSize = strokeSize + 1;
                 }else if(keyEvent.getCode().getName() == "Down" && strokeSize >= 2){
                     strokeSize = strokeSize -1;
                 }else if (keyEvent.getCode().getName() == "C"){
                     gc.clearRect(0,0,DEFAULT_SCENE_WIDTH,DEFAULT_SCENE_HEIGHT);
-//                    gc.clearRect(0,0,DEFAULT_SCENE_WIDTH,DEFAULT_SCENE_HEIGHT);
                 }else if (keyEvent.getCode().getName() == "R"){
                     gc.setStroke(Color.color(Math.random(), Math.random(), Math.random()));
-//                    gcSecond.setStroke(Color.color(Math.random(), Math.random(), Math.random()));
-
                 }
                 System.out.println(keyEvent.getCode());
                 System.out.println(keyEvent.getText());
@@ -146,28 +142,14 @@ public class Main extends Application {
 
             @Override
             public void handle(MouseEvent e) {
-//                System.out.println("x: " + e.getX() + ", y: " + e.getY());
                 if (isDrawing) {
                     if(e.isDragDetect()) {
                         gc.strokeOval(e.getX(), e.getY(), strokeSize, strokeSize);
                         X = e.getX();
                         Y = e.getY();
-
-//                addStroke(e.getX(), e.getY(), 10);
                         currentStroke = new Stroke(e.getX(), e.getY(), strokeSize);
-//                        System.out.println(jsonStringGenerator(currentStroke));
                         tempJsonString = jsonStringGeneratorStroke(currentStroke);
                         startClient();
-
-//                        System.out.println(tempJsonString);
-
-//                        Stroke testJson = jsonRestore(tempJsonString);
-//                        if (gcSecond != null) {
-//                            gcSecond.strokeOval(X, Y, strokeSize, strokeSize);
-//
-////                       System.out.println("x: " + testJson.strokeX + " y: " + testJson.strokeY + " stroke size: " + testJson.strokeSize);
-//
-//                        }
                     }
                 }
             }
@@ -183,16 +165,13 @@ public class Main extends Application {
         Stage secondaryStage = new Stage();
         secondaryStage.setTitle("Welcome to JavaFX");
 
-        // we're using a grid layout
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         grid.setGridLinesVisible(false);
-//        grid.setPrefSize(primaryStage.getMaxWidth(), primaryStage.getMaxHeight());
 
-        // add buttons and canvas to the grid
         Text sceneTitle = new Text("Welcome to Paint application");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 0);
@@ -214,22 +193,8 @@ public class Main extends Application {
         // add canvas
         Canvas canvas = new Canvas(DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT-100);
 
-//        gc = canvas.getGraphicsContext2D();
-//        gcSecond.setFill(Color.GREEN);
-//        gcSecond.setStroke(Color.BLUE);
-//        gc.setStroke(Color.BLACK);
-//        gcSecond.strokeOval(X,Y, strokeSize,strokeSize);
-
-//        canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                gcSecond.strokeOval(X, Y, strokeSize,strokeSize);
-//            }
-//        });
-
         grid.add(canvas,0,2);
 
-        // set our grid layout on the scene
         Scene defaultScene = new Scene(grid, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT);
 
         secondaryStage.setScene(defaultScene);
@@ -239,19 +204,12 @@ public class Main extends Application {
     }
 
     public void startClient() {
-        // connect to the server on the target port
         try {
             Socket clientSocket = new Socket("localhost", 8005);
-
-            // once we connect to the server, we also have an input and output stream
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            // send the server an arbitrary message
             out.println(tempJsonString);
-            // read what the server returns
             String serverResponse = in.readLine();
-
-            // close the connection
             clientSocket.close();
 
         } catch (IOException ioe) {
@@ -259,19 +217,6 @@ public class Main extends Application {
         }
     }
 
-
-//    public void saveStrokes(MouseEvent mouseEvents) {
-//        try {
-//            File strokeFile = new File("stroke.txt");
-//            FileWriter strokeWriter = new FileWriter(strokeFile);
-//            strokeWriter.write("Strokes: " + mouseEvents.getX() + " " + mouseEvents.getY());
-//            strokeWriter.close();
-//
-//
-//        } catch (IOException ioExc) {
-//            ioExc.printStackTrace();
-//        }
-//    }
     public boolean isDrawing() {
         return isDrawing;
     }
@@ -284,12 +229,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-//
-//    public static void serverStart(){
-//        System.out.println("Running");
-//        Server myServer = new Server();
-//        myServer.startServer();
-//    }
+
 
     public String jsonStringGeneratorStroke (Stroke currentStroke) {
         JsonSerializer jsonSerializer = new JsonSerializer().deep(true);

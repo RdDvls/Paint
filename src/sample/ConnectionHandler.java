@@ -43,7 +43,7 @@ public class ConnectionHandler implements Runnable{
             Stroke jsonStroke = jsonRestore(inputLine);
 //            System.out.println(jsonStroke.strokeX);
             gc.strokeOval(jsonStroke.strokeX,jsonStroke.strokeY,jsonStroke.strokeSize, jsonStroke.strokeSize);
-            outputToClient.println("This is irrelevant");
+            outputToClient.println("Drawing");
         }
     }
     public Stroke jsonRestore(String jsonString) {
